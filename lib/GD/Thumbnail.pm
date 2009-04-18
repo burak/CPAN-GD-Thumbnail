@@ -13,7 +13,7 @@ package GD::Thumbnail;
 use strict;
 use vars qw($VERSION %TMP);
 
-$VERSION = '1.31'; # GD version check below breaks ExtUtils::MM
+$VERSION = '1.32'; # GD version check below breaks ExtUtils::MM
 
 use GD;
 use Carp qw( croak );
