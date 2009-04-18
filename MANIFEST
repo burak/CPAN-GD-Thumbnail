@@ -2,7 +2,6 @@ lib/GD/Thumbnail.pm
 t/1-pod.t
 t/2-pod-coverage.t
 t/3-simple.t
-t/skip.test
 tools/Build.pm
 Changes
 Makefile.PL
