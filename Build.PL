@@ -29,7 +29,7 @@ my $mb = $class->new(
     },
     meta_merge => {
         resources => {
-            repository => 'http://bitbucket.org/burak/cpan-lingua-any-numbers/',
+            repository => 'http://bitbucket.org/burak/cpan-gd-thumbnail/',
         },
     },
 );
