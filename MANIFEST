@@ -4,7 +4,6 @@ t/2-pod-coverage.t
 t/3-simple.t
 tools/Build.pm
 Changes
-Makefile.PL
 Build.PL
 MANIFEST
 MANIFEST.SKIP
