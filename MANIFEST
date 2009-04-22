@@ -1,6 +1,5 @@
 lib/GD/Thumbnail.pm
 t/003-simple.t
-tools/Build.pm
 Changes
 Build.PL
 MANIFEST
