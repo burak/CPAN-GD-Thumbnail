@@ -1,19 +1,8 @@
-package GD::Thumbnail::Compat;
-BEGIN {
-   if($] <  5.006) {
-      if(! exists $INC{'bytes.pm'}) {
-         $INC{'bytes.pm'} = 1;
-         eval 'package 
-         bytes; sub import {} sub unimport {}';
-      }
-   }
-}
-
 package GD::Thumbnail;
 use strict;
 use vars qw($VERSION %TMP);
 
-$VERSION = '1.34'; # GD version check below breaks ExtUtils::MM
+$VERSION = '1.35'; # GD version check below breaks ExtUtils::MM
 
 use GD;
 use Carp qw( croak );
@@ -121,11 +110,13 @@ sub create {
    my $ty        = $yy + $yy2;
    my $new_y     = $o ? $y : $y + $ty;
    my $thumb     = GD::Image->new($x, $new_y);
-   my $iy        = 0;
-   my @strips;
+
+   # RT#49353 | Alexander Vonk: prefill Thumbnail with strip color, as promised
+   $thumb->fill( 0, 0, $thumb->colorAllocate( @{ $self->{STRIP_COLOR} } ) );
 
    $thumb->colorAllocate(@{ +WHITE }) if ! $info;
 
+   my $iy = 0;
    if ($info) {
       $iy = $o     ? $y - $yy
           : $info2 ? $y + $yy + BUFFER/2
@@ -133,6 +124,7 @@ sub create {
           ;
    }
 
+   my @strips;
    push @strips, [$info , 0, $iy, 0, 0, $x, $y , 100] if $info;
    push @strips, [$info2, 0,   0, 0, 0, $x, $yy, 100] if $info2;
 
