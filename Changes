@@ -2,6 +2,9 @@ Revision history for Perl extension GD::Thumbnail.
 
 Time zone is GMT+2.
 
+1.40 Fri Sep 25 19:48:53 2009
+    => Perl::Critic refactoring.
+
 1.35 Fri Sep  4 00:29:03 2009
     => Fix for RT#49353. Thanks to Alexander Vonk.
     => Removed the bytes pragma trick for legacy perls. If you still need it,
