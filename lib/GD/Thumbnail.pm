@@ -282,20 +282,20 @@ sub _image_size {
    my $image    = shift;
    my $img_size = 0;
    # don't do that at home. very dangerous :p
-   if ( GD::Image->can('_image_type') && GD::Image::_image_type($image) ) {
+   my $is_image = GD::Image->can('_image_type')
+                  && GD::Image::_image_type($image); ## no critic (ProtectPrivateSubs)
+   if ( $is_image ) { # raw data
       use bytes;
       $img_size = length $image;
    }
-   elsif ( defined fileno $image ) {
+   elsif ( defined fileno $image ) { # filehandle
       binmode $image;
       use bytes;
       local $/;
       $img_size = length <$image>;
    }
-   else {
-      if(-e $image && !-d _) {
-         $img_size = (stat $image)[STAT_SIZE];
-      }
+   else { # file
+      $img_size = (stat $image)[STAT_SIZE] if -e $image && !-d _;
    }
    return $img_size;
 }
