@@ -9,4 +9,9 @@
             repository => 'http://bitbucket.org/burak/cpan-gd-thumbnail/',
         },
     },
+    BUILDER => {
+        change_versions                  => 1,
+        copyright_first_year             => '2006',
+        add_pod_author_copyright_license => 1,
+    },
 }
