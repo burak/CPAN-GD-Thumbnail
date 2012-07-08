@@ -2,6 +2,9 @@ Revision history for Perl extension GD::Thumbnail.
 
 Time zone is GMT+2.
 
+1.41 Sun Jul  8 01:50:04 2012
+    => Bump version.
+
 1.40 Fri Sep 25 19:48:53 2009
     => Perl::Critic refactoring.
 

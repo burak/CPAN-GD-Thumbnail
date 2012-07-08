@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use vars qw($VERSION %TMP);
 
-$VERSION = '1.40';
+$VERSION = '1.41';
 
 use GD;
 use Carp qw( croak );
