@@ -343,6 +343,8 @@ __END__
 
 =pod
 
+=encoding utf8
+
 =head1 NAME
 
 GD::Thumbnail - Thumbnail maker for GD
