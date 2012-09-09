@@ -50,31 +50,39 @@ sub new {
    my($class, @args)= @_;
    my %o    = @args % 2 ? () : @args;
    my $self = {
-      DIMENSION   => [ 0, 0 ], # Thumbnail dimension
-      GD_FONT     => 'Tiny', # info text color
-      OVERLAY     => 0,      # bool: overlay info strips?
-      STRIP_COLOR => BLACK,
-      INFO_COLOR  => WHITE,
-      SQUARE      => 0,      # bool: make square thumb?
-      FRAME_COLOR => BLACK,
-      FRAME       => 0,      # bool: add frame?
-      FORCE_MIME  => q{},     # force output type?
-      MIME        => q{},
+      DIMENSION            => [ 0, 0 ], # Thumbnail dimension
+      DIMENSION_CONSTRAINT => 0,        # don't exceed w/h?
+      FRAME_COLOR          => BLACK,
+      FRAME                => 0,        # bool: add frame?
+      FORCE_MIME           => q{},      # force output type?
+      GD_FONT              => 'Tiny',   # info text color
+      INFO_COLOR           => WHITE,
+      MIME                 => q{},
+      OVERLAY              => 0,        # bool: overlay info strips?
+      STRIP_COLOR          => BLACK,
+      SQUARE               => 0,        # bool: make square thumb?
    };
-   $self->{FRAME}      = $o{frame}  ? 1          : 0;
-   $self->{SQUARE}     = $o{square} ? $o{square} : 0;
-   $self->{OVERLAY}    = ($o{overlay}   || $self->{SQUARE}) ? 1 : 0;
-   $self->{FORCE_MIME} = $o{force_mime} || q{};
+
+   $self->{FRAME}   = $o{frame}  ? 1          : 0;
+   $self->{SQUARE}  = $o{square} ? $o{square} : 0;
+   $self->{OVERLAY} = ($o{overlay} || $self->{SQUARE}) ? 1 : 0;
+
+   for my $name ( qw( FORCE_MIME DIMENSION_CONSTRAINT ) ) {
+      $self->{ $name } = $o{ lc $name } if defined $o{ lc $name };
+   }
+
    if ( $o{font} and my $font = $IS_GD_FONT{ lc $o{font} } ) {
       $self->{GD_FONT} = $font;
    }
-   for my $id (qw[STRIP_COLOR INFO_COLOR FRAME_COLOR]) {
+
+   for my $id ( qw( STRIP_COLOR INFO_COLOR FRAME_COLOR ) ) {
       if (my $color = $o{ lc $id }) {
          if ( ref $color && ref $color eq 'ARRAY' && $#{$color} == 2 ) {
             $self->{$id} = $color;
          }
       }
    }
+
    bless  $self, $class;
    return $self;
 }
@@ -96,13 +104,17 @@ sub _check_type {
 }
 
 sub _check_ratio {
-   my($self, $max, $w) = @_;
+   my($self, $max, $w, $h) = @_;
    my $ratio;
    if ( $max =~ RE_RATIO ) {
       $ratio = $1;
    }
    else {
-      $ratio = sprintf '%.1f', $max * RATIO_CONSTANT / $w;
+      my $n = $self->{DIMENSION_CONSTRAINT}
+            ? $w > $h ? $w : $h
+            : $w
+            ;
+      $ratio = sprintf '%.1f', $max * RATIO_CONSTANT / $n;
    }
    croak 'Can not determine thumbnail ratio' if ! $ratio;
    return $ratio;
@@ -184,7 +196,7 @@ sub create {
    my $size      = $info2 ? $self->_image_size( $image ) : 0;
    my $gd        = GD::Image->new($image) or croak "GD::Image->new error: $!";
    my($w, $h)    = $gd->getBounds         or croak "getBounds() failed: $!";
-   my $ratio     = $self->_check_ratio($max, $w);
+   my $ratio     = $self->_check_ratio($max, $w, $h);
    my $square    = $self->{SQUARE} || 0;
    my $crop      = $square && lc $square eq 'crop';
 
@@ -456,6 +468,11 @@ the red, green, blue values:
 
 You can alter the thumbnail mime with this parameter. 
 Can be set to: C<png>, C<jpeg> or C<gif>.
+
+=head3 dimension_constraint
+
+If set to true, the resulting dimensions will take the original
+image dimensions into consideration. Disabled by default.
 
 =head2 create
 
