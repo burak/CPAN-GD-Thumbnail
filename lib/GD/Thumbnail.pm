@@ -383,10 +383,10 @@ and resolution & mime type can be added to the thumbnail's
 upper and lower parts. This feature can be useful for web
 software (image galleries or forums).
 
-This is a I<Yet Another> type of module. There are several 
-other thumbnail modules on CPAN, but they simply don't have 
+This is a I<Yet Another> type of module. There are several
+other thumbnail modules on C<CPAN>, but they simply don't have
 the features I need, so this module is written to increase
-the thumbnail generator population on CPAN.
+the thumbnail generator population on C<CPAN>.
 
 The module can raise an exception if something goes wrong.
 So, you may have to use an C<eval block> to catch them. 
@@ -428,7 +428,7 @@ be smaller than the actual image and image quality may also differ.
 You'll get a square thumbnail, if this is set to true. If the 
 original image is not a square, the empty parts will be filled 
 with blank (color is the same as C<strip_color>) instead of
-streching the image in C<x> or C<y> dimension or clipping
+stretching the image in C<x> or C<y> dimension or clipping
 it. If, however, C<square> is set to C<crop>, you'll get a
 cropped square thumbnail.
 
@@ -447,7 +447,7 @@ Controls the C<frame> color. Default is black.
 =head3 strip_color
 
 Sets the info strip background color. Default is black.
-You must pass it as a three element arayref containing
+You must pass it as a three element array reference containing
 the red, green, blue values:
 
    $thumb = GD::Thumbnail->new(
@@ -457,7 +457,7 @@ the red, green, blue values:
 =head3 info_color
 
 Sets the info strip text color. Default is white.
-You must pass it as a three element arayref containing
+You must pass it as a three element array reference containing
 the red, green, blue values:
 
    $thumb = GD::Thumbnail->new(
@@ -484,7 +484,7 @@ C<create()> accepts three arguments:
 
 =head3 image
 
-Can be a file path, a filehandle or raw binary data.
+Can be a file path, a file handle or raw binary data.
 
 =head3 max
 
@@ -533,14 +533,14 @@ to the top of the thumbnail:
    | 20x20 JPEG  |
     -------------
 
-As you can see from the schemas above, with the default options,
+As you can see from the examples above, with the default options,
 thumbnail image dimension is constant when adding information strips 
-(ie: strips don't overlay, but attached to upper and lower parts of 
+(i.e.: strips don't overlay, but attached to upper and lower parts of
 thumbnail). Each info strip increases thumbnail height by 8 pixels 
-(if the default tiny gd font C<Tiny> is used).
+(if the default tiny C<GD> font C<Tiny> is used).
 
 But see the C<overlay> and C<square> options in L</new> to alter this
-behaviour. You may also need to increase C<max> value if C<square> is
+behavior. You may also need to increase C<max> value if C<square> is
 enabled.
 
 =head2 mime
@@ -566,9 +566,9 @@ You may get a warning, if there is something odd.
 
 =item *
 
-B<I<"GIF format is not supported by this version (%f) of GD">>
+B<I<"C<GIF> format is not supported by this version (%f) of GD">>
 
-You have an old version of GD and your original image is a GIF
+You have an old version of GD and your original image is a C<GIF>
 image. Also, the code may die after this warning.
 
 =item *
@@ -604,7 +604,7 @@ than the original image.
 =head1 CAVEATS
 
 Supported image types are limited with GD types, which include
-png, jpeg and gif and some others. See L<GD> for more information.
+C<png>, C<jpeg> and C<gif> and some others. See L<GD> for more information.
 Usage of any other image type will be resulted with a fatal
 error.
 
