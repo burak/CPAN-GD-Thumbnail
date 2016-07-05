@@ -1,5 +1,8 @@
 Revision history for Perl extension GD::Thumbnail.
 
+1.42 Tue Jul  5 02:21:01 2016
+    => Bump version.
+
 1.41 Sun Sep  9 02:48:43 2012
     => New option dimension_constraint. Requested by "isync".
 
