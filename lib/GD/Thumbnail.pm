@@ -1,9 +1,7 @@
 package GD::Thumbnail;
+
 use strict;
 use warnings;
-use vars qw($VERSION %TMP);
-
-$VERSION = '1.42';
 
 use GD;
 use Carp qw( croak );
@@ -30,7 +28,7 @@ use constant RATIO_CONSTANT       =>  100;
 use constant RE_FILE_EXTENSION    => qr{ [.] (png|gif|jpg|jpe|jpeg) \z }xmsi;
 use constant RE_RATIO             => qr{ (\d+)(?:\s+|)% }xms;
 
-%TMP = ( # global template. so that one can change the text
+our %TMP = ( # global template. so that one can change the text
    GB   => '%.2f GB',
    MB   => '%.2f MB',
    KB   => '%.2f KB',
