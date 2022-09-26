@@ -59,21 +59,21 @@ sub new {
     my($class, @args)= @_;
     my %o    = @args % 2 ? () : @args;
     my $self = {
-      DEFAULT_TEXT         => undef,
-      DIMENSION            => [ 0, 0 ], # Thumbnail dimension
-      DIMENSION_CONSTRAINT => 0,        # don't exceed w/h?
-      FORCE_MIME           => q{},      # force output type?
-      FRAME                => 0,        # bool: add frame?
-      FRAME_COLOR          => BLACK,
-      GD_FONT              => 'Tiny',   # info text color
-      INFO_COLOR           => WHITE,
-      MIME                 => q{},
-      OVERLAY              => 0,        # bool: overlay info strips?
-      SQUARE               => 0,        # bool: make square thumb?
-      STRIP_COLOR          => BLACK,
-      STRIP_HEIGHT_BUFFER  => STRIP_HEIGHT_BUFFER,
-      TTF_FONT             => undef,
-      TTF_PTSIZE           => 18,
+        DEFAULT_TEXT         => undef,
+        DIMENSION            => [ 0, 0 ], # Thumbnail dimension
+        DIMENSION_CONSTRAINT => 0,        # don't exceed w/h?
+        FORCE_MIME           => q{},      # force output type?
+        FRAME                => 0,        # bool: add frame?
+        FRAME_COLOR          => BLACK,
+        GD_FONT              => 'Tiny',   # info text color
+        INFO_COLOR           => WHITE,
+        MIME                 => q{},
+        OVERLAY              => 0,        # bool: overlay info strips?
+        SQUARE               => 0,        # bool: make square thumb?
+        STRIP_COLOR          => BLACK,
+        STRIP_HEIGHT_BUFFER  => STRIP_HEIGHT_BUFFER,
+        TTF_FONT             => undef,
+        TTF_PTSIZE           => 18,
     };
 
     $self->{FRAME}   = $o{frame}  ? 1          : 0;
@@ -87,12 +87,12 @@ sub new {
         TTF_PTSIZE
         STRIP_HEIGHT_BUFFER
     ) ) {
-       next if ! defined $o{ lc $name };
-       $self->{ $name } = $o{ lc $name };
+        next if ! defined $o{ lc $name };
+        $self->{ $name } = $o{ lc $name };
     }
 
     if ( $o{font} and my $font = $IS_GD_FONT{ lc $o{font} } ) {
-      $self->{GD_FONT} = $font;
+        $self->{GD_FONT} = $font;
     }
     elsif ( my $ttf = $o{ttf_font} ) {
         if ( ! -e $ttf || ! -r _ ) {
@@ -102,11 +102,11 @@ sub new {
     }
 
     for my $id ( qw( STRIP_COLOR INFO_COLOR FRAME_COLOR ) ) {
-      if (my $color = $o{ lc $id }) {
-         if ( ref $color && ref $color eq 'ARRAY' && $#{$color} == 2 ) {
-            $self->{$id} = $color;
-         }
-      }
+        if (my $color = $o{ lc $id }) {
+            if ( ref $color && ref $color eq 'ARRAY' && $#{$color} == 2 ) {
+                $self->{$id} = $color;
+            }
+        }
     }
 
     bless  $self, $class;
@@ -117,7 +117,7 @@ sub _check_type {
     my($self, $image) = @_;
     my $type;
     if ( length $image <= PATH_LENGTH && $image =~ RE_FILE_EXTENSION ) {
-      $type = $KNOWN{lc $1};
+        $type = $KNOWN{lc $1};
     }
 
     $type = DEFAULT_MIME if ! $type;
@@ -128,14 +128,14 @@ sub _check_ratio {
     my($self, $max, $w, $h) = @_;
     my $ratio;
     if ( $max =~ RE_RATIO ) {
-      $ratio = $1;
+        $ratio = $1;
     }
     else {
-      my $n = $self->{DIMENSION_CONSTRAINT}
-            ? $w > $h ? $w : $h
-            : $w
-            ;
-      $ratio = sprintf '%.1f', $max * RATIO_CONSTANT / $n;
+        my $n = $self->{DIMENSION_CONSTRAINT}
+              ? $w > $h ? $w : $h
+              : $w
+              ;
+        $ratio = sprintf '%.1f', $max * RATIO_CONSTANT / $n;
     }
     croak 'Can not determine thumbnail ratio' if ! $ratio;
     return $ratio;
@@ -162,18 +162,18 @@ sub _strips {
 sub _alter_for_crop {
     my($self, $xsmall, $x_ref, $y_ref, $dx_ref, $dy_ref) = @_;
     if ( $xsmall ) {
-      my $diff   = (${$y_ref} - ${$x_ref}) / ${$x_ref};
-      ${$x_ref} += ${$x_ref} * $diff;
-      ${$y_ref} += ${$y_ref} * $diff;
-      ${$dy_ref} = -${$dx_ref} * (2 - ${$x_ref} / ${$y_ref})**2;
-      ${$dx_ref} = 0;
+        my $diff   = (${$y_ref} - ${$x_ref}) / ${$x_ref};
+        ${$x_ref} += ${$x_ref} * $diff;
+        ${$y_ref} += ${$y_ref} * $diff;
+        ${$dy_ref} = -${$dx_ref} * (2 - ${$x_ref} / ${$y_ref})**2;
+        ${$dx_ref} = 0;
     }
     else {
-      my $diff   = (${$x_ref} - ${$y_ref}) / ${$y_ref};
-      ${$x_ref} += ${$x_ref} * $diff;
-      ${$y_ref} += ${$y_ref} * $diff;
-      ${$dx_ref} = -${$dy_ref} * ( 2 - ${$y_ref}/${$x_ref} )**2;
-      ${$dy_ref} = 0;
+        my $diff   = (${$x_ref} - ${$y_ref}) / ${$y_ref};
+        ${$x_ref} += ${$x_ref} * $diff;
+        ${$y_ref} += ${$y_ref} * $diff;
+        ${$dx_ref} = -${$dy_ref} * ( 2 - ${$y_ref}/${$x_ref} )**2;
+        ${$dy_ref} = 0;
     }
     return;
 }
@@ -181,26 +181,26 @@ sub _alter_for_crop {
 sub _setup_parameters {
     my($self, $opt, $x_ref, $y_ref, $dx_ref, $dy_ref, $ty_ref ) = @_;
     if ( $opt->{square} ) {
-      my $rx = $opt->{width} < $opt->{height} ? $opt->{width}/$opt->{height} : 1;
-      my $ry = $opt->{width} < $opt->{height} ? 1 : $opt->{height}/$opt->{width};
-      my $d;
-      if ( $opt->{xsmall} ) {
-         $d         =  ${$x_ref} * $rx;
-         ${$dx_ref} = (${$x_ref} - $d) / 2;
-         ${$x_ref}  = $d;
-      }
-      else {
-         $d         = ${$y_ref} * $ry;
-         ${$dy_ref} = (${$y_ref} - $d) / 2;
-         ${$y_ref}  = $d;
-      }
+        my $rx = $opt->{width} < $opt->{height} ? $opt->{width}/$opt->{height} : 1;
+        my $ry = $opt->{width} < $opt->{height} ? 1 : $opt->{height}/$opt->{width};
+        my $d;
+        if ( $opt->{xsmall} ) {
+            $d         =  ${$x_ref} * $rx;
+            ${$dx_ref} = (${$x_ref} - $d) / 2;
+            ${$x_ref}  = $d;
+        }
+        else {
+            $d         = ${$y_ref} * $ry;
+            ${$dy_ref} = (${$y_ref} - $d) / 2;
+            ${$y_ref}  = $d;
+        }
     }
 
     if ( ! $opt->{square} || ( $opt->{square} && $opt->{xsmall} ) ) {
-      # does not work if square & y_is_small, 
-      # since we may have info bars which eat y space
-      ${$ty_ref} = 0; # TODO. test this more and remove from below
-      ${$y_ref}  = ${$y_ref} - ${$ty_ref} - $self->{STRIP_HEIGHT_BUFFER}/2 if $opt->{overlay};
+        # does not work if square & y_is_small, 
+        # since we may have info bars which eat y space
+        ${$ty_ref} = 0; # TODO. test this more and remove from below
+        ${$y_ref}  = ${$y_ref} - ${$ty_ref} - $self->{STRIP_HEIGHT_BUFFER}/2 if $opt->{overlay};
     }
     return;
 }
@@ -227,8 +227,8 @@ sub create {
     my $yy        = 0; # yy & yy2 has the same value
     my $yy2       = 0;
 
-  ($info , $yy ) = $self->_strip($self->_text($w,$h,$type), $x, $y) if $info;
-  ($info2, $yy2) = $self->_strip($self->_size($size)      , $x, $y) if $info2;
+    ($info , $yy ) = $self->_strip($self->_text($w,$h,$type), $x, $y) if $info;
+    ($info2, $yy2) = $self->_strip($self->_size($size)      , $x, $y) if $info2;
 
     my $ty        = $yy + $yy2;
     my $new_y     = $o ? $y : $y + $ty;
@@ -245,14 +245,14 @@ sub create {
     my $xsmall = $x < $def_y;
 
     $self->_setup_parameters(
-      {
-         xsmall  => $xsmall,
-         square  => $square,
-         width   => $w,
-         height  => $h,
-         overlay => $o,
-      },
-      \$x, \$y, \$dx, \$dy, \$ty
+        {
+            xsmall  => $xsmall,
+            square  => $square,
+            width   => $w,
+            height  => $h,
+            overlay => $o,
+        },
+        \$x, \$y, \$dx, \$dy, \$ty
     );
 
     $self->_alter_for_crop( $xsmall, \$x, \$y, \$dx, \$dy ) if $crop;
@@ -273,12 +273,12 @@ sub _finish {
     $self->{DIMENSION}[IMG_Y] = $dim[IMG_Y];
 
     if ($self->{FRAME}) {
-      my $color = $thumb->colorAllocate(@{ $self->{FRAME_COLOR} });
-      $thumb->rectangle( 0, 0, $dim[IMG_X] - 1, $dim[IMG_Y] - 1, $color );
+        my $color = $thumb->colorAllocate(@{ $self->{FRAME_COLOR} });
+        $thumb->rectangle( 0, 0, $dim[IMG_X] - 1, $dim[IMG_Y] - 1, $color );
     }
 
     my $mime = $self->_force_mime($thumb);
-      $type = $mime if $mime;
+    $type = $mime if $mime;
     $self->{MIME} = $type;
     my @iopt;
     push @iopt, MAX_JPEG_QUALITY    if $type eq 'jpeg';
@@ -316,19 +316,19 @@ sub _image_size {
     my $img_size = 0;
     # don't do that at home. very dangerous :p
     my $is_image = GD::Image->can('_image_type')
-                  && GD::Image::_image_type($image); ## no critic (ProtectPrivateSubs)
+                    && GD::Image::_image_type($image); ## no critic (ProtectPrivateSubs)
     if ( $is_image ) { # raw data
-      use bytes;
-      $img_size = length $image;
+        use bytes;
+        $img_size = length $image;
     }
     elsif ( defined fileno $image ) { # filehandle
-      binmode $image;
-      use bytes;
-      local $/;
-      $img_size = length <$image>;
+        binmode $image;
+        use bytes;
+        local $/;
+        $img_size = length <$image>;
     }
     else { # file
-      $img_size = (stat $image)[STAT_SIZE] if -e $image && !-d _;
+        $img_size = (stat $image)[STAT_SIZE] if -e $image && !-d _;
     }
     return $img_size;
 }
@@ -355,15 +355,15 @@ sub _strip_ttf_font {
 
     # call once to calculate the location
     my @box = GD::Image->stringFT(
-                 GD::Image->new(1,1)->colorAllocate( 0, 0, 0 ),
-                 $self->{TTF_FONT},
-                 $ptsize,
-                 0, # angle
-                 0, # x
-                 0, # y
-                 $string,
-                 \%ttf_opt,
-            );
+                    GD::Image->new(1,1)->colorAllocate( 0, 0, 0 ),
+                    $self->{TTF_FONT},
+                    $ptsize,
+                    0, # angle
+                    0, # x
+                    0, # y
+                    $string,
+                    \%ttf_opt,
+                );
 
     my $sw = abs $box[TTF_BOUNDS_LOWER_RIGHT_X] - $box[TTF_BOUNDS_LOWER_LEFT_X];
     my $sh = abs $box[TTF_BOUNDS_UPPER_RIGHT_Y] - $box[TTF_BOUNDS_LOWER_RIGHT_Y];
