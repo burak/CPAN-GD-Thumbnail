@@ -6,7 +6,6 @@ use warnings;
 use GD;
 use Carp qw( croak );
 
-use constant GIF_OK               => $GD::VERSION >= 2.15 || $GD::VERSION <= 1.19;
 use constant DEFAULT_MIME         => 'png';
 use constant STRIP_HEIGHT_BUFFER  => 4; # y-buffer for info strips in pixels
 use constant BLACK                => [   0,   0,   0 ];
@@ -118,11 +117,6 @@ sub _check_type {
    my $type;
    if ( length $image <= PATH_LENGTH && $image =~ RE_FILE_EXTENSION ) {
       $type = $KNOWN{lc $1};
-      if ( $type eq 'gif' && !GIF_OK ) {
-         # code will probably die at $gd assignment below
-         warn "GIF format is not supported by this version ($GD::VERSION) of GD\n";
-         $type = DEFAULT_MIME;
-      }
    }
 
    $type = DEFAULT_MIME if ! $type;
@@ -657,13 +651,6 @@ Must be called after L</create>.
 You may get a warning, if there is something odd.
 
 =over 4
-
-=item *
-
-B<I<"C<GIF> format is not supported by this version (%f) of GD">>
-
-You have an old version of GD and your original image is a C<GIF>
-image. Also, the code may die after this warning.
 
 =item *
 
