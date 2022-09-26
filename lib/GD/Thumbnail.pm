@@ -573,12 +573,10 @@ format.
 
     my $thumb = GD::Thumbnail->new(%args);
 
-=head3 overlay
+=head3 dimension_constraint
 
-If you want information strips (see L</create>), but you don't
-want to get a longer image, set this to a true value, and
-the information strips will not affect the image height
-(but the actual thumbnail image will be smaller).
+If set to true, the resulting dimensions will take the original
+image dimensions into consideration. Disabled by default.
 
 =head3 font
 
@@ -589,6 +587,37 @@ want to use bigger thumbnails, you can alter the used font via this
 argument. It may also be useful for adding size & resolution 
 information to existing images. But beware that GD output size may 
 be smaller than the actual image and image quality may also differ.
+
+=head3 force_mime
+
+You can alter the thumbnail mime with this parameter. 
+Can be set to: C<png>, C<jpeg> or C<gif>.
+
+=head3 frame
+
+If set to true, a 1x1 pixel border will be added to the final
+image.
+
+=head3 frame_color
+
+Controls the C<frame> color. Default is black.
+
+=head3 info_color
+
+Sets the info strip text color. Default is white.
+You must pass it as a three element array reference containing
+the red, green, blue values:
+
+    $thumb = GD::Thumbnail->new(
+      info_color => [255, 255, 255]
+    );
+
+=head3 overlay
+
+If you want information strips (see L</create>), but you don't
+want to get a longer image, set this to a true value, and
+the information strips will not affect the image height
+(but the actual thumbnail image will be smaller).
 
 =head3 square
 
@@ -602,15 +631,6 @@ cropped square thumbnail.
 Beware that enabling this option will also B<auto-enable> the 
 C<overlay> option, since it is needed for a square image.
 
-=head3 frame
-
-If set to true, a 1x1 pixel border will be added to the final
-image.
-
-=head3 frame_color
-
-Controls the C<frame> color. Default is black.
-
 =head3 strip_color
 
 Sets the info strip background color. Default is black.
@@ -620,26 +640,6 @@ the red, green, blue values:
     $thumb = GD::Thumbnail->new(
       strip_color => [255, 0, 0]
     );
-
-=head3 info_color
-
-Sets the info strip text color. Default is white.
-You must pass it as a three element array reference containing
-the red, green, blue values:
-
-    $thumb = GD::Thumbnail->new(
-      info_color => [255, 255, 255]
-    );
-
-=head3 force_mime
-
-You can alter the thumbnail mime with this parameter. 
-Can be set to: C<png>, C<jpeg> or C<gif>.
-
-=head3 dimension_constraint
-
-If set to true, the resulting dimensions will take the original
-image dimensions into consideration. Disabled by default.
 
 =head2 create
 

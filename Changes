@@ -1,6 +1,7 @@
 Revision history for Perl extension GD::Thumbnail.
 
 {{$NEXT}}
+    - TTF font support for the info strip.
 
 1.44 2018-12-24 BURAK
     - Migrate to dzil.
