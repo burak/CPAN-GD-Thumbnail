@@ -52,6 +52,8 @@ use constant {
     RE_RATIO                 => qr{ (\d+)(?:\s+|)% }xms,
     STAT_SIZE                => 7,
     STRIP_HEIGHT_BUFFER      => 4, # y-buffer for info strips in pixels
+    STRIP_TYPE_BOTTOM        => 1,
+    STRIP_TYPE_TOP           => 2,
     THUMBNAIL_DIMENSION      => [ 0, 0 ],
 
     TTF_BOUNDS_LOWER_LEFT_X  => 0,
@@ -253,8 +255,19 @@ sub create {
     my $yy        = 0; # yy & yy2 has the same value
     my $yy2       = 0;
 
-    ($info , $yy ) = $self->_strip($self->_text($w,$h,$type), $x, $y) if $info;
-    ($info2, $yy2) = $self->_strip($self->_size($size)      , $x, $y) if $info2;
+    ($info , $yy ) = $self->_strip(
+                        $self->_text( $w, $h, $type ),
+                        $x,
+                        $y,
+                        STRIP_TYPE_BOTTOM
+                    ) if $info;
+
+    ($info2, $yy2) = $self->_strip(
+                        $self->_size( $size ),
+                        $x,
+                        $y,
+                        STRIP_TYPE_TOP,
+                    ) if $info2;
 
     my $ty        = $yy + $yy2;
     my $new_y     = $o ? $y : $y + $ty;
@@ -371,6 +384,7 @@ sub _strip_ttf_font {
     my $string = shift;
     my $x      = shift;
     my $y      = shift;
+    my $type   = shift;
 
     my $ptsize = $self->{TTF_PTSIZE};
 
@@ -391,11 +405,17 @@ sub _strip_ttf_font {
                     \%ttf_opt,
                 );
 
-    my $sw = abs $box[TTF_BOUNDS_LOWER_RIGHT_X] - $box[TTF_BOUNDS_LOWER_LEFT_X];
-    my $sh = abs $box[TTF_BOUNDS_UPPER_RIGHT_Y] - $box[TTF_BOUNDS_LOWER_RIGHT_Y];
+    my $sw = abs  $box[TTF_BOUNDS_LOWER_RIGHT_X]
+                - $box[TTF_BOUNDS_LOWER_LEFT_X];
+    my $sh = abs  $box[TTF_BOUNDS_UPPER_RIGHT_Y]
+                - $box[TTF_BOUNDS_LOWER_RIGHT_Y];
 
+    my $ybuf  = $self->{STRIP_HEIGHT_BUFFER};
     my $ttf_x = ( $x - $sw ) / 2;
-    my $ttf_y = abs( $box[TTF_BOUNDS_UPPER_RIGHT_Y] ) + ( $self->{STRIP_HEIGHT_BUFFER} / 2 );
+    my $ttf_y = abs( $box[TTF_BOUNDS_UPPER_RIGHT_Y] )
+                + ( $ybuf / 2 );
+
+    $ttf_y /= 2 if ! $self->{OVERLAY} && $type == STRIP_TYPE_BOTTOM;
 
     if ( $x < $sw ) {
         warn "Thumbnail width ($x) is too small for an info text ($sw)\n";
@@ -403,13 +423,14 @@ sub _strip_ttf_font {
         $ttf_x = 0;
     }
 
-    my $info  = GD::Image->new($x, $sh+$self->{STRIP_HEIGHT_BUFFER});
-    my $color = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
-    $info->filledRectangle(0,0,$sw,$sh+$self->{STRIP_HEIGHT_BUFFER},$color);
+    my $info = GD::Image->new( $x, $sh + $ybuf );
+    my $strip_color  = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
+    my $string_color = $info->colorAllocate(@{ $self->{INFO_COLOR}  });
+    $info->filledRectangle( 0, 0, $sw, $sh + $ybuf, $strip_color );
 
     # The actual call to place the text
     $info->stringFT(
-        $info->colorAllocate(@{ $self->{INFO_COLOR} }),
+        $string_color,
         $self->{TTF_FONT},
         $ptsize,
         0, # angle
@@ -419,7 +440,7 @@ sub _strip_ttf_font {
         \%ttf_opt,
     );
 
-    return $info, $sh + $self->{STRIP_HEIGHT_BUFFER};
+    return $info, $sh + $ybuf;
 }
 
 sub _strip_gd_font {
@@ -427,16 +448,20 @@ sub _strip_gd_font {
     my $string = shift;
     my $x      = shift;
     my $y      = shift;
+    my $type   = shift;
 
-    my $type   = $self->{GD_FONT};
-    my $font   = GD::Font->$type();
-    my $sw     = $font->width * length $string;
-    my $sh     = $font->height;
+    my $gd_font = $self->{GD_FONT};
+    my $font    = GD::Font->$gd_font();
+    my $sw      = $font->width * length $string;
+    my $sh      = $font->height;
+
     warn "Thumbnail width ($x) is too small for an info text\n" if $x < $sw;
+
     my $info   = GD::Image->new($x, $sh+$self->{STRIP_HEIGHT_BUFFER});
     my $color = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
     $info->filledRectangle(0,0,$x,$sh+$self->{STRIP_HEIGHT_BUFFER},$color);
     $info->string($font, ($x - $sw)/2, 0, $string, $info->colorAllocate(@{ $self->{INFO_COLOR} }));
+
     return $info, $sh + $self->{STRIP_HEIGHT_BUFFER};
 }
 
