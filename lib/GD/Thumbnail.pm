@@ -578,6 +578,10 @@ format.
 If set to true, the resulting dimensions will take the original
 image dimensions into consideration. Disabled by default.
 
+=head3 default_text
+
+Can be used to alter the bottom info strip text.
+
 =head3 font
 
 Alters the information text font. You can set this to  C<Small>, 
@@ -631,6 +635,10 @@ cropped square thumbnail.
 Beware that enabling this option will also B<auto-enable> the 
 C<overlay> option, since it is needed for a square image.
 
+=head3 strip_height_buffer
+
+The y buffer for the strips in pixels.
+
 =head3 strip_color
 
 Sets the info strip background color. Default is black.
@@ -640,6 +648,17 @@ the red, green, blue values:
     $thumb = GD::Thumbnail->new(
       strip_color => [255, 0, 0]
     );
+
+=head3 ttf_font
+
+The file path to the TTF font, if you want to use that instead of the built-in
+GD fonts. You also need to unset the C<font> parameter, otherwise it will
+take precedence.
+
+=head3 ttf_ptsize
+
+The point size of the TTF font you want to use. If not set, htne it will default
+to C<18>.
 
 =head2 create
 
