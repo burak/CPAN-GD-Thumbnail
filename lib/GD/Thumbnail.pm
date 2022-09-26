@@ -8,7 +8,7 @@ use Carp qw( croak );
 
 use constant GIF_OK               => $GD::VERSION >= 2.15 || $GD::VERSION <= 1.19;
 use constant DEFAULT_MIME         => 'png';
-use constant BUFFER               => 2; # y-buffer for info strips in pixels
+use constant STRIP_HEIGHT_BUFFER  => 4; # y-buffer for info strips in pixels
 use constant BLACK                => [   0,   0,   0 ];
 use constant WHITE                => [ 255, 255, 255 ];
 use constant IMG_X                => 0;
@@ -71,6 +71,7 @@ sub new {
       OVERLAY              => 0,        # bool: overlay info strips?
       STRIP_COLOR          => BLACK,
       SQUARE               => 0,        # bool: make square thumb?
+      STRIP_HEIGHT_BUFFER  => STRIP_HEIGHT_BUFFER,
       TTF_FONT             => undef,
       TTF_PTSIZE           => 18,
    };
@@ -84,6 +85,7 @@ sub new {
         DIMENSION_CONSTRAINT
         FORCE_MIME
         TTF_PTSIZE
+        STRIP_HEIGHT_BUFFER
     ) ) {
        next if ! defined $o{ lc $name };
        $self->{ $name } = $o{ lc $name };
@@ -148,8 +150,8 @@ sub _get_iy {
    my($self, $info, $info2, $o, $y, $yy) = @_;
    return 0 if ! $info;
    return $o       ? $y - $yy
-          : $info2 ? $y + $yy + BUFFER/2
-          :          $y       + BUFFER/2
+          : $info2 ? $y + $yy + $self->{STRIP_HEIGHT_BUFFER}/2
+          :          $y       + $self->{STRIP_HEIGHT_BUFFER}/2
           ;
 }
 
@@ -203,7 +205,7 @@ sub _setup_parameters {
       # does not work if square & y_is_small, 
       # since we may have info bars which eat y space
       ${$ty_ref} = 0; # TODO. test this more and remove from below
-      ${$y_ref}  = ${$y_ref} - ${$ty_ref} - BUFFER/2 if $opt->{overlay};
+      ${$y_ref}  = ${$y_ref} - ${$ty_ref} - $self->{STRIP_HEIGHT_BUFFER}/2 if $opt->{overlay};
    }
    return;
 }
@@ -230,8 +232,8 @@ sub create {
    my $yy        = 0; # yy & yy2 has the same value
    my $yy2       = 0;
 
-  ($info , $yy ) = $self->_strip($self->_text($w,$h,$type), $x) if $info;
-  ($info2, $yy2) = $self->_strip($self->_size($size)      , $x) if $info2;
+  ($info , $yy ) = $self->_strip($self->_text($w,$h,$type), $x, $y) if $info;
+  ($info2, $yy2) = $self->_strip($self->_size($size)      , $x, $y) if $info2;
 
    my $ty        = $yy + $yy2;
    my $new_y     = $o ? $y : $y + $ty;
@@ -347,6 +349,7 @@ sub _strip_ttf_font {
     my $self = shift;
     my $string = shift;
     my $x      = shift;
+    my $y      = shift;
 
     my $ptsize = $self->{TTF_PTSIZE};
 
@@ -360,9 +363,9 @@ sub _strip_ttf_font {
                  GD::Image->new(1,1)->colorAllocate( 0, 0, 0 ),
                  $self->{TTF_FONT},
                  $ptsize,
-                 0,
-                 0,
-                 0,
+                 0, # angle
+                 0, # x
+                 0, # y
                  $string,
                  \%ttf_opt,
             );
@@ -371,7 +374,7 @@ sub _strip_ttf_font {
     my $sh = abs $box[TTF_BOUNDS_UPPER_RIGHT_Y] - $box[TTF_BOUNDS_LOWER_RIGHT_Y];
 
     my $ttf_x = ( $x - $sw ) / 2;
-    my $ttf_y = abs $box[TTF_BOUNDS_UPPER_RIGHT_Y];
+    my $ttf_y = abs( $box[TTF_BOUNDS_UPPER_RIGHT_Y] ) + ( $self->{STRIP_HEIGHT_BUFFER} / 2 );
 
     if ( $x < $sw ) {
         warn "Thumbnail width ($x) is too small for an info text ($sw)\n";
@@ -379,23 +382,23 @@ sub _strip_ttf_font {
         $ttf_x = 0;
     }
 
-    my $info  = GD::Image->new($x, $sh+BUFFER);
+    my $info  = GD::Image->new($x, $sh+$self->{STRIP_HEIGHT_BUFFER});
     my $color = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
-    $info->filledRectangle(0,0,$sw,$sh+BUFFER,$color);
+    $info->filledRectangle(0,0,$sw,$sh+$self->{STRIP_HEIGHT_BUFFER},$color);
 
     # The actual call to place the text
     $info->stringFT(
         $info->colorAllocate(@{ $self->{INFO_COLOR} }),
         $self->{TTF_FONT},
         $ptsize,
-        0,
+        0, # angle
         $ttf_x,
         $ttf_y,
         $string,
         \%ttf_opt,
     );
 
-    return $info, $sh + BUFFER;
+    return $info, $sh + $self->{STRIP_HEIGHT_BUFFER};
 }
 
 sub _strip_gd_font {
@@ -403,17 +406,18 @@ sub _strip_gd_font {
     my $self = shift;
     my $string = shift;
     my $x      = shift;
+    my $y      = shift;
 
     my $type   = $self->{GD_FONT};
     my $font   = GD::Font->$type();
     my $sw     = $font->width * length $string;
     my $sh     = $font->height;
     warn "Thumbnail width ($x) is too small for an info text\n" if $x < $sw;
-    my $info   = GD::Image->new($x, $sh+BUFFER);
+    my $info   = GD::Image->new($x, $sh+$self->{STRIP_HEIGHT_BUFFER});
     my $color = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
-    $info->filledRectangle(0,0,$x,$sh+BUFFER,$color);
+    $info->filledRectangle(0,0,$x,$sh+$self->{STRIP_HEIGHT_BUFFER},$color);
     $info->string($font, ($x - $sw)/2, 0, $string, $info->colorAllocate(@{ $self->{INFO_COLOR} }));
-    return $info, $sh + BUFFER;
+    return $info, $sh + $self->{STRIP_HEIGHT_BUFFER};
 }
 
 sub _size {
