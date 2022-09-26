@@ -426,7 +426,14 @@ sub _strip_ttf_font {
     my $info = GD::Image->new( $x, $sh + $ybuf );
     my $strip_color  = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
     my $string_color = $info->colorAllocate(@{ $self->{INFO_COLOR}  });
-    $info->filledRectangle( 0, 0, $sw, $sh + $ybuf, $strip_color );
+
+    $info->filledRectangle(
+        0,
+        0,
+        $sw,
+        $sh + $ybuf,
+        $strip_color,
+    );
 
     # The actual call to place the text
     $info->stringFT(
@@ -444,7 +451,7 @@ sub _strip_ttf_font {
 }
 
 sub _strip_gd_font {
-    my $self = shift;
+    my $self   = shift;
     my $string = shift;
     my $x      = shift;
     my $y      = shift;
@@ -454,15 +461,36 @@ sub _strip_gd_font {
     my $font    = GD::Font->$gd_font();
     my $sw      = $font->width * length $string;
     my $sh      = $font->height;
+    my $ybuf    = $self->{STRIP_HEIGHT_BUFFER};
 
     warn "Thumbnail width ($x) is too small for an info text\n" if $x < $sw;
 
-    my $info   = GD::Image->new($x, $sh+$self->{STRIP_HEIGHT_BUFFER});
-    my $color = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
-    $info->filledRectangle(0,0,$x,$sh+$self->{STRIP_HEIGHT_BUFFER},$color);
-    $info->string($font, ($x - $sw)/2, 0, $string, $info->colorAllocate(@{ $self->{INFO_COLOR} }));
+    my $info         = GD::Image->new( $x, $sh + $ybuf );
+    my $strip_color  = $info->colorAllocate(@{ $self->{STRIP_COLOR} });
+    my $string_color = $info->colorAllocate(@{ $self->{INFO_COLOR}  });
 
-    return $info, $sh + $self->{STRIP_HEIGHT_BUFFER};
+    my $gd_y = ! $self->{OVERLAY} && $type == STRIP_TYPE_BOTTOM
+                    ? 0
+                    : $ybuf / 2
+                ;
+
+    $info->filledRectangle(
+        0,
+        0,
+        $x,
+        $sh + $ybuf,
+        $strip_color,
+    );
+
+    $info->string(
+        $font,
+        ($x - $sw)/2,
+        $gd_y,
+        $string,
+        $string_color,
+    );
+
+    return $info, $sh + $ybuf;
 }
 
 sub _size {
@@ -636,7 +664,7 @@ and your C<max> value is to small to fit an info text.
 If info parameter is not set, or it has a false value, you'll get
 a normal thumbnail image:
 
-    _____________
+     _____________
     | ........... |
     | ........... |
     | ...IMAGE... |
@@ -647,7 +675,7 @@ a normal thumbnail image:
 If you set it to C<1>, original image's dimensions and mime will be
 added below the thumbnail:
 
-    _____________
+     _____________
     | ........... |
     | ........... |
     | ...IMAGE... |
@@ -660,7 +688,7 @@ added below the thumbnail:
 If you set it to C<2>, the byte size of the image will be added
 to the top of the thumbnail:
 
-    _____________
+     _____________
     |    25 KB    |
     |-------------|
     | ........... |
