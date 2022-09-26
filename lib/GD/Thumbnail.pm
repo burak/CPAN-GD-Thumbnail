@@ -702,7 +702,7 @@ added below the thumbnail:
     | ........... |
     |_____________|
     | 20x20 JPEG  |
-    -------------
+     -------------
 
 If you set it to C<2>, the byte size of the image will be added
 to the top of the thumbnail:
@@ -717,7 +717,7 @@ to the top of the thumbnail:
     | ........... |
     |_____________|
     | 20x20 JPEG  |
-    -------------
+     -------------
 
 As you can see from the examples above, with the default options,
 thumbnail image dimension is constant when adding information strips 
