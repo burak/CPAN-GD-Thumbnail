@@ -6,28 +6,29 @@ use warnings;
 use GD;
 use Carp qw( croak );
 
-use constant DEFAULT_MIME         => 'png';
-use constant STRIP_HEIGHT_BUFFER  => 4; # y-buffer for info strips in pixels
-use constant BLACK                => [   0,   0,   0 ];
-use constant WHITE                => [ 255, 255, 255 ];
-use constant IMG_X                => 0;
-use constant IMG_Y                => 1;
-use constant ALL_MIME             => qw(gif png jpeg gd gd2 wbmp);
-
-use constant KILOBYTE             => 1024;
-use constant MEGABYTE             => 1024 * KILOBYTE;
-use constant GIGABYTE             => 1024 * MEGABYTE;
-
-use constant DEFAULT_MAX_PIXELS   =>   50;
-use constant PATH_LENGTH          =>  255;
-use constant MAX_JPEG_QUALITY     =>  100;
-use constant MAX_PNG_COMPRESSION  =>    9;
-use constant STAT_SIZE            =>    7;
-use constant RATIO_CONSTANT       =>  100;
-use constant RE_FILE_EXTENSION    => qr{ [.] (png|gif|jpg|jpe|jpeg) \z }xmsi;
-use constant RE_RATIO             => qr{ (\d+)(?:\s+|)% }xms;
+use constant ALL_MIME        => qw(gif png jpeg gd gd2 wbmp);
 
 use constant {
+    BLACK                    => [   0,   0,   0 ],
+    WHITE                    => [ 255, 255, 255 ],
+
+    KILOBYTE                 => 1024,
+    MEGABYTE                 => 1024 * 2,
+    GIGABYTE                 => 1024 * 3,
+
+    DEFAULT_MAX_PIXELS       => 50,
+    DEFAULT_MIME             => 'png',
+    IMG_X                    => 0,
+    IMG_Y                    => 1,
+    MAX_JPEG_QUALITY         => 100,
+    MAX_PNG_COMPRESSION      => 9,
+    PATH_LENGTH              => 255,
+    RATIO_CONSTANT           => 100,
+    RE_FILE_EXTENSION        => qr{ [.] (png|gif|jpg|jpe|jpeg) \z }xmsi,
+    RE_RATIO                 => qr{ (\d+)(?:\s+|)% }xms,
+    STAT_SIZE                => 7,
+    STRIP_HEIGHT_BUFFER      => 4, # y-buffer for info strips in pixels
+
     TTF_BOUNDS_LOWER_LEFT_X  => 0,
     TTF_BOUNDS_LOWER_LEFT_Y  => 1,
     TTF_BOUNDS_LOWER_RIGHT_X => 2,
@@ -396,7 +397,6 @@ sub _strip_ttf_font {
 }
 
 sub _strip_gd_font {
-    die 66;
     my $self = shift;
     my $string = shift;
     my $x      = shift;
