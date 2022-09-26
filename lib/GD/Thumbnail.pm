@@ -430,7 +430,7 @@ sub _strip_ttf_font {
     $info->filledRectangle(
         0,
         0,
-        $sw,
+        $x,
         $sh + $ybuf,
         $strip_color,
     );
