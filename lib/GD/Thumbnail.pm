@@ -6,7 +6,27 @@ use warnings;
 use GD;
 use Carp qw( croak );
 
-use constant ALL_MIME        => qw(gif png jpeg gd gd2 wbmp);
+use constant ALL_MIME => qw(
+    gd
+    gd2
+    gif
+    jpeg
+    png
+    wbmp
+);
+
+use constant MIME_OVERRIDE => qw(
+    jpe    jpeg
+    jpg    jpeg
+);
+
+use constant KNOWN_GD_FONTS => qw(
+    Giant
+    Large
+    MediumBold
+    Small
+    Tiny
+);
 
 use constant {
     BLACK                    => [   0,   0,   0 ],
@@ -18,6 +38,10 @@ use constant {
 
     DEFAULT_MAX_PIXELS       => 50,
     DEFAULT_MIME             => 'png',
+    DEFAULT_TTF_PTSIZE       => 18,
+    EMPTY_STRING             => q{},
+    FALSE                    => 0,
+    GD_FONT                  => 'Tiny',
     IMG_X                    => 0,
     IMG_Y                    => 1,
     MAX_JPEG_QUALITY         => 100,
@@ -28,6 +52,7 @@ use constant {
     RE_RATIO                 => qr{ (\d+)(?:\s+|)% }xms,
     STAT_SIZE                => 7,
     STRIP_HEIGHT_BUFFER      => 4, # y-buffer for info strips in pixels
+    THUMBNAIL_DIMENSION      => [ 0, 0 ],
 
     TTF_BOUNDS_LOWER_LEFT_X  => 0,
     TTF_BOUNDS_LOWER_LEFT_Y  => 1,
@@ -47,11 +72,12 @@ our %TMP = ( # global template. so that one can change the text
     TEXT => '<WIDTH>x<HEIGHT> <MIME>',
 );
 
-my %KNOWN = map { ($_, $_) } ALL_MIME;
-    $KNOWN{'jpg'} = 'jpeg';
-    $KNOWN{'jpe'} = 'jpeg';
+my %KNOWN = (
+    MIME_OVERRIDE,
+    map { ($_, $_) } ALL_MIME
+);
 
-my %IS_GD_FONT = map { ( lc($_), $_ ) } qw(Small Large MediumBold Tiny Giant);
+my %IS_GD_FONT = map { ( lc($_), $_ ) } KNOWN_GD_FONTS;
 
 GD::Image->trueColor(1) if GD::Image->can('trueColor');
 
@@ -60,20 +86,20 @@ sub new {
     my %o    = @args % 2 ? () : @args;
     my $self = {
         DEFAULT_TEXT         => undef,
-        DIMENSION            => [ 0, 0 ], # Thumbnail dimension
-        DIMENSION_CONSTRAINT => 0,        # don't exceed w/h?
-        FORCE_MIME           => q{},      # force output type?
-        FRAME                => 0,        # bool: add frame?
+        DIMENSION            => THUMBNAIL_DIMENSION,
+        DIMENSION_CONSTRAINT => FALSE,        # don't exceed w/h?
+        FORCE_MIME           => EMPTY_STRING, # force output type?
+        FRAME                => FALSE,        # add frame?
         FRAME_COLOR          => BLACK,
-        GD_FONT              => 'Tiny',   # info text color
+        GD_FONT              => GD_FONT,      # info text color
         INFO_COLOR           => WHITE,
-        MIME                 => q{},
-        OVERLAY              => 0,        # bool: overlay info strips?
-        SQUARE               => 0,        # bool: make square thumb?
+        MIME                 => EMPTY_STRING,
+        OVERLAY              => FALSE,        # overlay info strips?
+        SQUARE               => FALSE,        # make square thumb?
         STRIP_COLOR          => BLACK,
         STRIP_HEIGHT_BUFFER  => STRIP_HEIGHT_BUFFER,
         TTF_FONT             => undef,
-        TTF_PTSIZE           => 18,
+        TTF_PTSIZE           => DEFAULT_TTF_PTSIZE,
     };
 
     $self->{FRAME}   = $o{frame}  ? 1          : 0;
