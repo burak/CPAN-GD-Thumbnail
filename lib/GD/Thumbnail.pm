@@ -59,6 +59,7 @@ sub new {
    my($class, @args)= @_;
    my %o    = @args % 2 ? () : @args;
    my $self = {
+      DEFAULT_TEXT         => undef,
       DIMENSION            => [ 0, 0 ], # Thumbnail dimension
       DIMENSION_CONSTRAINT => 0,        # don't exceed w/h?
       FRAME_COLOR          => BLACK,
@@ -78,9 +79,15 @@ sub new {
    $self->{SQUARE}  = $o{square} ? $o{square} : 0;
    $self->{OVERLAY} = ($o{overlay} || $self->{SQUARE}) ? 1 : 0;
 
-   for my $name ( qw( FORCE_MIME DIMENSION_CONSTRAINT TTF_PTSIZE ) ) {
-      $self->{ $name } = $o{ lc $name } if defined $o{ lc $name };
-   }
+   for my $name ( qw(
+        DEFAULT_TEXT
+        DIMENSION_CONSTRAINT
+        FORCE_MIME
+        TTF_PTSIZE
+    ) ) {
+       next if ! defined $o{ lc $name };
+       $self->{ $name } = $o{ lc $name };
+    }
 
    if ( $o{font} and my $font = $IS_GD_FONT{ lc $o{font} } ) {
       $self->{GD_FONT} = $font;
@@ -299,7 +306,7 @@ sub _force_mime {
 sub _text {
    my($self, $w, $h, $type) = @_;
    $type = uc $type;
-   my $tmp = $TMP{TEXT} || croak 'TEXT template is not set';
+   my $tmp = $self->{DEFAULT_TEXT} || $TMP{TEXT} || croak 'TEXT template is not set';
    $tmp =~ s{<WIDTH>}{$w}xmsg;
    $tmp =~ s{<HEIGHT>}{$h}xmsg;
    $tmp =~ s{<MIME>}{$type}xmsg;
@@ -378,16 +385,15 @@ sub _strip_ttf_font {
 
     # The actual call to place the text
     $info->stringFT(
-                 $info->colorAllocate(@{ $self->{INFO_COLOR} }),
-                 $self->{TTF_FONT},
-                 $ptsize,
-                 0,
-                 $ttf_x,
-                 $ttf_y,
-                 $string,
-                 \%ttf_opt,
+        $info->colorAllocate(@{ $self->{INFO_COLOR} }),
+        $self->{TTF_FONT},
+        $ptsize,
+        0,
+        $ttf_x,
+        $ttf_y,
+        $string,
+        \%ttf_opt,
     );
-
 
     return $info, $sh + BUFFER;
 }
